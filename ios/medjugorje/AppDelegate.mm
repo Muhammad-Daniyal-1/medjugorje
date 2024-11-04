@@ -1,5 +1,8 @@
 #import "AppDelegate.h"
-
+#import <Firebase.h>
+#import <UserNotifications/UserNotifications.h>
+#import <RNFBMessagingModule.h>
+#import <AVFoundation/AVFoundation.h>
 #import <React/RCTBundleURLProvider.h>
 
 @implementation AppDelegate
@@ -7,15 +10,22 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
   self.moduleName = @"medjugorje";
+  [FIRApp configure];
   // You can add your custom initial props in the dictionary below.
   // They will be passed down to the ViewController used by React Native.
   self.initialProps = @{};
+  
+  NSError *error = nil;
+    [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:&error];
+    if (error) {
+      NSLog(@"Failed to set audio session category: %@", error);
+    }
 
   return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }
 
 - (NSURL *)sourceURLForBridge:(RCTBridge *)bridge
-{
+{ 
   return [self bundleURL];
 }
 
@@ -27,5 +37,11 @@
   return [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
 #endif
 }
+
+- (void)application:(UIApplication *)application handleEventsForBackgroundURLSession:(NSString *)identifier completionHandler:(void (^)(void))completionHandler
+{
+  completionHandler();
+}
+
 
 @end
