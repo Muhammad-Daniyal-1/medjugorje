@@ -1,4 +1,4 @@
-import notifee, {EventType} from '@notifee/react-native';
+import notifee from '@notifee/react-native';
 import messaging from '@react-native-firebase/messaging';
 import {PERMISSIONS, request} from 'react-native-permissions';
 
@@ -14,19 +14,23 @@ export const getFcmToken = async () => {
 
 export async function registerAppWithFCM() {
   if (!messaging().isDeviceRegisteredForRemoteMessages) {
-    await messaging()
-      .registerDeviceForRemoteMessages()
-      .then(status => {})
-      .catch(error => {});
+    try {
+      await messaging()
+        .registerDeviceForRemoteMessages()
+        .then(status => {})
+        .catch(error => {});
+    } catch (error) {}
   }
 }
 
 export async function unRegisterAppWithFCM() {
   if (messaging().isDeviceRegisteredForRemoteMessages) {
-    await messaging()
-      .unregisterDeviceForRemoteMessages()
-      .then(status => {})
-      .catch(error => {});
+    try {
+      await messaging()
+        .unregisterDeviceForRemoteMessages()
+        .then(status => {})
+        .catch(error => {});
+    } catch (error) {}
   }
   await messaging().deleteToken();
 }

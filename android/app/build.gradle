@@ -81,10 +81,10 @@ android {
 
     namespace "com.medjugorje"
     defaultConfig {
-        applicationId "com.medjugorje"
+        applicationId "com.medjugorje.radio.wave.live"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 2
+        versionCode 3
         versionName "2.2.11"
     }
     signingConfigs {

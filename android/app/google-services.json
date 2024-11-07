@@ -2,7 +2,7 @@
   "project_info": {
     "project_number": "47811833673",
     "project_id": "push-notification-dbb0f",
-    "storage_bucket": "push-notification-dbb0f.appspot.com"
+    "storage_bucket": "push-notification-dbb0f.firebasestorage.app"
   },
   "client": [
     {
@@ -10,6 +10,25 @@
         "mobilesdk_app_id": "1:47811833673:android:38f9f08c6d61ddc7847498",
         "android_client_info": {
           "package_name": "com.medjugorje"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAsq9CjgiMGg0WaVHGWHlzdbxc-uGY8wLw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:47811833673:android:72a95e9d00ec76f7847498",
+        "android_client_info": {
+          "package_name": "com.medjugorje.radio.wave.live"
         }
       },
       "oauth_client": [],

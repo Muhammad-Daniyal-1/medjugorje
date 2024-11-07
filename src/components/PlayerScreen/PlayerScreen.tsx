@@ -5,18 +5,17 @@ import {
   Image,
   TouchableOpacity,
   Linking,
-  AppState,
-  AppStateStatus,
-  useWindowDimensions,
   SafeAreaView,
   ScrollView,
 } from 'react-native';
 import TrackPlayer, {
   Event,
   State,
+  Capability,
   usePlaybackState,
   useProgress,
   useTrackPlayerEvents,
+  AppKilledPlaybackBehavior,
 } from 'react-native-track-player';
 import {styles} from './styles';
 import images from '../../assets/img';
@@ -29,12 +28,8 @@ const PlayerScreen = () => {
   const playbackState = usePlaybackState();
   const progress = useProgress();
   const [streamName, setStreamName] = useState('Loading...');
-  const [isPlaying, setIsPlaying] = useState(false);
-  const appState = useRef<AppStateStatus>(AppState.currentState);
 
   const sheetRef = useRef<BottomSheet>(null);
-  const {width, height} = useWindowDimensions();
-  const isPortrait = height >= width;
 
   // Function to open the Bottom Sheet
   const openBottomSheet = () => {
@@ -47,44 +42,52 @@ const PlayerScreen = () => {
   useEffect(() => {
     setupPlayer();
 
-    const subscription = AppState.addEventListener(
-      'change',
-      handleAppStateChange,
-    );
-
     return () => {
       TrackPlayer.reset();
-      subscription.remove();
     };
   }, []);
 
   const setupPlayer = async () => {
     try {
       await TrackPlayer.setupPlayer();
+
+      await TrackPlayer.updateOptions({
+        android: {
+          // This is the default behavior
+          appKilledPlaybackBehavior: AppKilledPlaybackBehavior.ContinuePlayback,
+        },
+        capabilities: [Capability.Play, Capability.Pause, Capability.Stop],
+        notificationCapabilities: [
+          Capability.Play,
+          Capability.Pause,
+          Capability.Stop,
+        ],
+        compactCapabilities: [Capability.Play, Capability.Pause],
+      });
+
       await TrackPlayer.add({
         id: 1,
         url: streamUrl,
         title: 'Live Stream',
-        artist: 'Artist Name',
+        // artist: 'Artist Name',
       });
+
       await TrackPlayer.play();
     } catch (error) {
-      // console.warn('Error setting up player:', error);
+      // Handle error
     }
   };
 
   const togglePlayback = async () => {
     try {
-      const currentState = await TrackPlayer.getPlaybackState();
-      if (currentState.state === State.Playing) {
+      const currentState = await TrackPlayer.getState();
+      if (currentState === State.Playing) {
         await TrackPlayer.pause();
-        setIsPlaying(false);
       } else {
         await TrackPlayer.play();
-        setIsPlaying(true);
       }
     } catch (error) {
-      // console.warn('Error toggling playback:', error);
+      // Handle error
     }
   };
 
@@ -92,37 +95,18 @@ const PlayerScreen = () => {
     Linking.openURL(donateUrl);
   };
 
-  useTrackPlayerEvents([Event.PlaybackMetadataReceived], async event => {
-    if (event && event.artist && event.title) {
-      setStreamName(`${event.title}`);
-      await TrackPlayer.updateMetadataForTrack(1, {
-        title: event.title,
-        artist: event.artist,
+  useTrackPlayerEvents([Event.MetadataTimedReceived], async event => {
+    if (event && event.metadata[0].title) {
+      const titleWithArtist = event.metadata[0].title;
+      const title = titleWithArtist.split(' - ')[0];
+      setStreamName(title);
+      await TrackPlayer.updateMetadataForTrack(0, {
+        title: title,
       });
     } else {
       setStreamName('Live Stream');
     }
   });
-
-  useTrackPlayerEvents([Event.PlaybackError, Event.PlaybackState], event => {
-    if (event.type === Event.PlaybackError) {
-      setIsPlaying(false);
-    } else if (event.type === Event.PlaybackState) {
-      if (event.state === State.Playing) {
-        setIsPlaying(true);
-      } else {
-        setIsPlaying(false);
-      }
-    }
-  });
-
-  const handleAppStateChange = async (nextAppState: AppStateStatus) => {
-    if (appState.current.match(/active/) && nextAppState === 'background') {
-      await TrackPlayer.pause();
-      setIsPlaying(false);
-    }
-    appState.current = nextAppState;
-  };
 
   return (
     <LinearGradient

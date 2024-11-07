@@ -21,5 +21,9 @@ module.exports = async function () {
     TrackPlayer.addEventListener('remote-stop', () => {
       TrackPlayer.destroy();
     });
+
+    TrackPlayer.addEventListener('metadata-chapter-received', event => {
+      console.log('metadata-chapter', event);
+    });
   } catch (error) {}
 };
